@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soil Type Classifier</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    #loader {
+      display: none;
+      margin: 20px auto;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Soil Type Classifier</h1>
+  <p>Upload an image of soil or take a picture to classify its type.</p>
+  <input type="file" id="imageInput" accept="image/*" capture="camera">
+  <br><br>
+  <button onclick="uploadImage()">Classify Image</button>
+  <div id="loader">
+    <p>Classifying...</p>
+  </div>
+  <p id="result"></p>
+
+  <script>
+    async function uploadImage() {
+      const input = document.getElementById('imageInput');
+      const loader = document.getElementById('loader');
+      const result = document.getElementById('result');
+
+      // Clear previous results
+      result.innerText = '';
+      
+      if (!input.files.length) {
+        alert('Please upload or capture an image');
+        return;
+      }
+
+      // Show the loader
+      loader.style.display = 'block';
+
+      // Prepare the form data
+      const formData = new FormData();
+      formData.append('file', input.files[0]);
+
+      try {
+        const response = await fetch('http://127.0.0.1:8080/predict', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          result.innerText = `Prediction: ${data.prediction}`;
+        } else {
+          result.innerText = `Error: ${data.error}`;
+        }
+      } catch (error) {
+        result.innerText = `Error: Unable to connect to the server`;
+        console.error('Error:', error);
+      } finally {
+        // Hide the loader
+        loader.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>
+

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Soil Type Classifier</title>
+  <title>MyCrop</title>
   <style>
     /* Basic Reset */
     body,
@@ -91,19 +91,68 @@
 
     /* Image Preview Styles */
     #imagePreview {
+      display: block;
+      /* Asegura que la imagen sea un bloque */
+      margin: 0 auto;
+      /* Centra la imagen horizontalmente */
       margin-top: 20px;
+      /* Espaciado superior */
       max-width: 100%;
       max-height: 300px;
       border-radius: 5px;
-      display: none;
       /* Hide initially */
+    }
+
+    #outputSection {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    #outputSection img {
+      display: block;
+      /* Necesario para centrar con margin auto */
+      max-width: 100%;
+      max-height: 200px;
+      margin: 10px auto;
+      border-radius: 5px;
+    }
+
+    #outputSection p {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      margin: 10px 0;
+    }
+
+    #recommendations {
+      margin-top: 20px;
+      text-align: left;
+      display: none;
+      /* Ocultar inicialmente */
+    }
+
+    #recommendations h3 {
+      font-size: 18px;
+      color: #4CAF50;
+      margin-bottom: 10px;
+    }
+
+    #recommendations ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    #recommendations li {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 5px;
     }
   </style>
 </head>
 
 <body>
   <div class="container">
-    <h1>Soil Type Classifier</h1>
+    <h1>MyCrop</h1>
 
     <!-- Input for uploading from gallery -->
     <label for="galleryInput">Upload Image from Gallery</label>
@@ -121,8 +170,16 @@
 
     <!-- Image preview section -->
     <img id="imagePreview" alt="Image Preview">
+    <p id="result"></p>
+    <p id="loader" style="display:none; color: #333;">Processing, please wait...</p>
+    <div id="recommendations">
+      <h3>Recommended Crops:</h3>
+      <ul id="cropList"></ul>
+    </div>
 
   </div>
+
+
 
   <script>
     let selectedFile = null; // Variable to hold the selected file
@@ -148,25 +205,22 @@
     };
 
     // Function to display the image preview
-    function previewImage(file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const imagePreview = document.getElementById('imagePreview');
-        imagePreview.src = e.target.result; // Set image source to the loaded file
-        imagePreview.style.display = 'block'; // Make the image preview visible
-      };
-      reader.readAsDataURL(file); // Read the image file as a data URL
-    }
-
-    // Function to upload the selected image for classification
     async function uploadImage() {
       if (!selectedFile) {
         alert('Please select an image from the gallery or take a photo.');
         return;
       }
 
+      if (selectedFile.type.split('/')[0] !== 'image') {
+        alert('Please select a valid image file.');
+        return;
+      }
+
       const formData = new FormData();
       formData.append('file', selectedFile);
+
+      // Mostrar el loader
+      document.getElementById('loader').style.display = 'block';
 
       try {
         const response = await fetch('/predict', {
@@ -175,17 +229,48 @@
         });
         const data = await response.json();
 
+        // Ocultar el loader
+        document.getElementById('loader').style.display = 'none';
+
         if (response.ok) {
-          result.innerText = `Prediction: ${data.prediction}`;
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            document.getElementById('imagePreview').src = e.target.result;
+            document.getElementById('imagePreview').style.display = 'block';
+          };
+          reader.readAsDataURL(selectedFile);
+          document.getElementById('result').innerText = `Prediction: ${data.prediction}`;
+
+          // Mostrar las recomendaciones
+          const recommendations = data.recommendations || [];
+          const recommendationsDiv = document.getElementById('recommendations');
+          const cropList = document.getElementById('cropList');
+          cropList.innerHTML = '';
+
+          if (recommendations.length > 0) {
+            recommendations.forEach(crop => {
+              const listItem = document.createElement('li');
+              listItem.innerText = `${crop.name} (Season: ${crop.season}, Difficulty: ${crop.difficulty})`;
+              cropList.appendChild(listItem);
+            });
+
+            recommendationsDiv.style.display = 'block';
+          } else {
+            cropList.innerHTML = '<li>No recommendations available for this soil type.</li>';
+            recommendationsDiv.style.display = 'block';
+          }
         } else {
-          result.innerText = `Error: ${data.error}`;
+          document.getElementById('result').innerText = `Error: ${data.error}`;
         }
       } catch (error) {
-        result.innerText = `Error: Unable to connect to the server`;
+        // Ocultar el loader
+        document.getElementById('loader').style.display = 'none';
+
+        document.getElementById('result').innerText = '';
+        const recommendationsDiv = document.getElementById('recommendations');
+        recommendationsDiv.style.display = 'block';
+        document.getElementById('cropList').innerHTML = '<li>Error: Unable to connect to the server. Please try again later.</li>';
         console.error('Error:', error);
-      } finally {
-        // Hide the loader
-        loader.style.display = 'none';
       }
     }
   </script>

@@ -1,64 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Soil Type Classifier</title>
   <style>
-    body {
+    /* Basic Reset */
+    body,
+    h1,
+    p {
+      margin: 0;
+      padding: 0;
       font-family: Arial, sans-serif;
-      text-align: center;
+    }
+
+    body {
+      background-color: #f4f4f9;
       padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
-    #loader {
+
+    .container {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #4CAF50;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 10px;
+      display: inline-block;
+    }
+
+    input[type="file"] {
       display: none;
-      margin: 20px auto;
     }
-    #result {
+
+    .custom-file-input {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .custom-file-input:hover {
+      background-color: #45a049;
+    }
+
+    .btn-classify {
+      background-color: #007bff;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
       margin-top: 20px;
-      font-size: 1.2em;
+    }
+
+    .btn-classify:hover {
+      background-color: #0056b3;
+    }
+
+    p#result {
+      margin-top: 20px;
+      font-size: 18px;
       font-weight: bold;
+      color: #333;
+    }
+
+    /* Image Preview Styles */
+    #imagePreview {
+      margin-top: 20px;
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 5px;
+      display: none;
+      /* Hide initially */
     }
   </style>
 </head>
+
 <body>
-  <h1>Soil Type Classifier</h1>
-  <p>Upload an image of soil or take a picture to classify its type.</p>
-  <input type="file" id="imageInput" accept="image/*" capture="camera">
-  <br><br>
-  <button onclick="uploadImage()">Classify Image</button>
-  <div id="loader">
-    <p>Classifying...</p>
+  <div class="container">
+    <h1>Soil Type Classifier</h1>
+
+    <!-- Input for uploading from gallery -->
+    <label for="galleryInput">Upload Image from Gallery</label>
+    <input type="file" id="galleryInput" accept="image/*">
+
+    <label for="cameraInput">Take a Photo with Camera</label>
+    <input type="file" id="cameraInput" accept="image/*" capture="camera">
+
+    <!-- Custom buttons -->
+    <button class="custom-file-input" onclick="document.getElementById('galleryInput').click()">Select Image</button>
+    <button class="custom-file-input" onclick="document.getElementById('cameraInput').click()">Open Camera</button>
+
+    <button class="btn-classify" onclick="uploadImage()">Classify Image</button>
+    <p id="result"></p>
+
+    <!-- Image preview section -->
+    <img id="imagePreview" alt="Image Preview">
+
   </div>
-  <p id="result"></p>
 
   <script>
-    async function uploadImage() {
-      const input = document.getElementById('imageInput');
-      const loader = document.getElementById('loader');
-      const result = document.getElementById('result');
+    let selectedFile = null; // Variable to hold the selected file
 
-      // Clear previous results
-      result.innerText = '';
-      
-      if (!input.files.length) {
-        alert('Please upload or capture an image');
+    // Function to trigger the gallery input
+    document.getElementById('galleryInput').onchange = () => {
+      const input = document.getElementById('galleryInput');
+      if (input.files.length > 0) {
+        selectedFile = input.files[0];
+        previewImage(selectedFile); // Display the selected image
+        alert('Image selected from gallery!');
+      }
+    };
+
+    // Function to trigger the camera input
+    document.getElementById('cameraInput').onchange = () => {
+      const input = document.getElementById('cameraInput');
+      if (input.files.length > 0) {
+        selectedFile = input.files[0];
+        previewImage(selectedFile); // Display the captured image
+        alert('Photo captured!');
+      }
+    };
+
+    // Function to display the image preview
+    function previewImage(file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const imagePreview = document.getElementById('imagePreview');
+        imagePreview.src = e.target.result; // Set image source to the loaded file
+        imagePreview.style.display = 'block'; // Make the image preview visible
+      };
+      reader.readAsDataURL(file); // Read the image file as a data URL
+    }
+
+    // Function to upload the selected image for classification
+    async function uploadImage() {
+      if (!selectedFile) {
+        alert('Please select an image from the gallery or take a photo.');
         return;
       }
 
-      // Show the loader
-      loader.style.display = 'block';
-
-      // Prepare the form data
       const formData = new FormData();
-      formData.append('file', input.files[0]);
+      formData.append('file', selectedFile);
 
       try {
-        const response = await fetch('http://127.0.0.1:8080/predict', {
+        const response = await fetch('/predict', {
           method: 'POST',
           body: formData,
         });
-
         const data = await response.json();
 
         if (response.ok) {
@@ -76,5 +190,5 @@
     }
   </script>
 </body>
-</html>
 
+</html>

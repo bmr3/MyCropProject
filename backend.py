@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import torchvision.transforms as transforms
 import sqlite3
+import imageio
 
 app = Flask(__name__)
 app.secret_key = '12345'
@@ -116,22 +117,37 @@ def adjust_brightness_contrast(img, alpha=1.0, beta=0):
 
 # Preprocesar imágenes para el modelo
 def preprocess_image(image, target_size=(299, 299)):
+    steps = []
+
     img_array = np.array(image)
     img_resized = cv2.resize(img_array, target_size)
+    steps.append(img_resized)
 
     # Aplicar suavizado y ajustes
     kernel = np.ones((3, 3), np.float32) / 9
     img_smoothed = cv2.filter2D(img_resized, -1, kernel)
+    steps.append(img_smoothed)
+    
     img_smoothed = cv2.bilateralFilter(img_smoothed, d=9, sigmaColor=75, sigmaSpace=75)
-    img_bright_contrast = adjust_brightness_contrast(img_smoothed, alpha=1.2, beta=0.5)
+    steps.append(img_smoothed)
 
+    img_bright_contrast = adjust_brightness_contrast(img_smoothed, alpha=1.2, beta=0.5)
+    steps.append(img_bright_contrast)
     # Convertir a tensor y normalizar
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
+    tensor = transform(img_bright_contrast).unsqueeze(0)
+    return tensor, steps
 
-    return transform(img_bright_contrast).unsqueeze(0)
+def create_gif(steps, output_path="preprocessing_steps.gif"):
+    # Convierte cada imagen de pasos a formato RGB si es necesario
+    rgb_steps = [cv2.cvtColor(step, cv2.COLOR_BGR2RGB) if len(step.shape) == 3 else step for step in steps]
+
+    # Escribir el GIF
+    imageio.mimsave(output_path, rgb_steps, fps=1)  # 1 frame por segundo
+    print(f"GIF creado en {output_path}")
 
 # Rutas de Flask
 @app.route('/')
@@ -153,7 +169,6 @@ def index():
     location = session.get('location')
     return render_template('index2.html', location=location)
 
-
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
@@ -166,7 +181,11 @@ def predict():
 
         # Preprocesar la imagen
         image = Image.open(file.stream).convert('RGB')
-        processed_image = preprocess_image(image).to(device)
+        tensor, steps = preprocess_image(image)
+        processed_image = tensor.to(device)
+
+        # Verificar la forma del tensor
+        print(f"Processed image shape: {processed_image.shape}")
 
         # Hacer predicción
         with torch.no_grad():
@@ -174,14 +193,20 @@ def predict():
             _, predicted_class_idx = torch.max(outputs, 1)
             predicted_class = class_labels[predicted_class_idx.item()]
 
+        # Generar el GIF de los pasos
+        gif_path = "static/preprocessing_steps.gif"
+        create_gif(steps, output_path=gif_path)
+
         # Obtener recomendaciones de cultivos
         recommendations = get_crops_for_soil(predicted_class)
 
         return jsonify({
             'prediction': predicted_class,
-            'recommendations': recommendations
+            'recommendations': recommendations,
+            'gif_path': gif_path
         })
     except Exception as e:
+        print(f"Error during prediction: {e}")
         return jsonify({'error': str(e)}), 500
 
 

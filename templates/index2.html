@@ -24,6 +24,31 @@
       margin: 0 auto;
     }
 
+    .gif-card {
+      background-color: #2c3e50;
+      color: #ecf0f1;
+      border: 2px solid #1abc9c;
+      border-radius: 10px;
+      padding: 20px;
+      max-width: 500px;
+      margin: 0 auto;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    .gif-card h3 {
+      font-size: 20px;
+      color: #1abc9c;
+      margin-bottom: 15px;
+    }
+
+    .gif-card img {
+      max-width: 100%;
+      border-radius: 8px;
+      border: 1px solid #ecf0f1;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
     h1 {
       color: #1abc9c;
     }
@@ -165,7 +190,12 @@
     <!-- Image Preview -->
     <img id="imagePreview" src="" alt="Image Preview">
 
-    <!-- Classify Image Button -->
+    <div id="gifContainer" style="display: none; margin-top: 20px;">
+      <div class="gif-card">
+        <h3>Preprocessing Steps</h3>
+        <img id="preprocessingGif" src="" alt="Preprocessing Steps" />
+      </div>
+    </div <!-- Classify Image Button -->
     <button class="btn-classify" id="classifyButton" onclick="classifyImage()">Classify Image</button>
 
     <!-- Result Display -->
@@ -185,6 +215,11 @@
       const file = event.target.files[0];
       if (file) {
         selectedFile = file;
+        const gifContainer = document.getElementById('gifContainer');
+        const gifElement = document.getElementById('preprocessingGif');
+        gifContainer.style.display = 'none';
+        gifElement.src = '';
+        
         const reader = new FileReader();
         reader.onload = function (e) {
           const imagePreview = document.getElementById('imagePreview');
@@ -207,7 +242,8 @@
 
       document.getElementById('loader').style.display = 'block'; // Show loader
       document.getElementById('result').textContent = ''; // Clear previous result
-
+      document.getElementById('recommendations').style.display = 'none'; // Ocultar recomendaciones
+      document.getElementById('gifContainer').style.display = 'none'; // Ocultar el GIF
       const formData = new FormData();
       formData.append('file', selectedFile);
 
@@ -221,6 +257,13 @@
 
         if (response.ok) {
           document.getElementById('result').textContent = `Prediction: ${data.prediction}`;
+
+          if (data.gif_path) {
+            const gifElement = document.getElementById('preprocessingGif');
+            gifElement.src = data.gif_path; // Establece la ruta del GIF generado
+            document.getElementById('gifContainer').style.display = 'block'; // Mostrar la tarjeta del GIF
+          }
+
           // Handle crop recommendations
           const recommendationsDiv = document.getElementById('recommendations');
           recommendationsDiv.style.display = 'block';

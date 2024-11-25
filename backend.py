@@ -168,7 +168,7 @@ def index():
     # Retrieve the stored location from session and pass it to the index page
     location = session.get('location')
     return render_template('index2.html', location=location)
-
+ 
 @app.route('/predict', methods=['POST'])
 def predict():
     try:

@@ -1,0 +1,295 @@
+/* Basic styles */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #2c3e50;
+    padding: 20px;
+    color: #ecf0f1;
+}
+
+.container {
+    background-color: #34495e;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.gif-card {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    border: 2px solid #1abc9c;
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 500px;
+    margin: 0 auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.gif-card h3 {
+    font-size: 20px;
+    color: #1abc9c;
+    margin-bottom: 15px;
+}
+
+.gif-card img {
+    max-width: 100%;
+    border-radius: 8px;
+    border: 1px solid #ecf0f1;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.8);
+    /* Fondo semitransparente */
+    display: none;
+    /* Ocultar el modal por defecto */
+}
+
+.modal-content {
+    position: relative;
+    background-color: #2c3e50;
+    margin: 10% auto;
+    padding: 30px;
+    /* Espaciado interno adicional */
+    border-radius: 10px;
+    width: 80%;
+    max-width: 600px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    color: #ecf0f1;
+    /* Texto claro */
+    font-family: Arial, sans-serif;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    /* Espaciado inferior */
+    text-align: center;
+    color: #1abc9c;
+    /* Verde */
+    font-size: 1.8em;
+}
+
+.modal-content p {
+    line-height: 1.8;
+    /* Altura de línea más grande */
+    font-size: 1.1em;
+    text-align: justify;
+    /* Justificar el texto */
+    margin-bottom: 15px;
+    /* Espaciado entre párrafos */
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+}
+
+.close-button:hover {
+    color: white;
+}
+
+.card {
+    background-color: #34495e;
+    /* Color de fondo de la tarjeta */
+    border-radius: 10px;
+    /* Bordes redondeados */
+    padding: 15px;
+    /* Espaciado interno */
+    margin-bottom: 15px;
+    /* Espaciado entre tarjetas */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    /* Sombra para dar efecto de elevación */
+    line-height: 1.8;
+    /* Altura de línea */
+    font-size: 1.1em;
+    /* Tamaño del texto */
+    text-align: justify;
+    /* Justificar texto */
+    color: #ecf0f1;
+    /* Color del texto */
+}
+
+.input-image-card {
+    background-color: #2c3e50;
+    /* Fondo del contenedor */
+    color: #ecf0f1;
+    /* Texto claro */
+    border: 2px solid #1abc9c;
+    /* Borde verde */
+    border-radius: 10px;
+    /* Bordes redondeados */
+    padding: 20px;
+    /* Espaciado interno */
+    max-width: 500px;
+    margin: 20px auto;
+    /* Centrado y espaciado */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    /* Sombra */
+    text-align: center;
+}
+
+/* Título de la tarjeta de imagen */
+.input-image-card h3 {
+    font-size: 20px;
+    color: #1abc9c;
+    /* Verde */
+    margin-bottom: 15px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 2em;
+    color: white;
+}
+
+button#infoButton {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+button#infoButton img.button-image {
+    width: 30px;
+    /* Ajusta el tamaño de la imagen */
+    height: 30px;
+    /* Ajusta el tamaño de la imagen */
+    border-radius: 50%;
+    /* Si quieres que la imagen sea redonda */
+}
+
+button#infoButton img.button-image:hover {
+    opacity: 0.8;
+    /* Efecto hover */
+}
+
+#imagePreview {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border: 2px solid #1abc9c; /* Marco */
+    border-radius: 10px; /* Bordes redondeados */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra */
+    background-color: #2c3e50; /* Placeholder fondo */
+  }
+
+#imagePreview .preview-text {
+    color: #555;
+    /* Dark gray text */
+    font-size: 16px;
+    text-align: center;
+}
+
+#recommendations {
+    margin-top: 20px;
+    text-align: center;
+    /* Centrar todo el contenido del contenedor */
+}
+
+#recommendations h3 {
+    font-size: 22px;
+    color: #1abc9c;
+    margin-bottom: 20px;
+}
+
+#cropList {
+    list-style: none;
+    /* Eliminar viñetas */
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    /* Asegurar que las tarjetas se apilen verticalmente */
+    align-items: center;
+    /* Centrar las tarjetas horizontalmente */
+}
+
+#cropList li {
+    background-color: #2c3e50;
+    /* Fondo blanco/gris claro */
+    color: white;
+    /* Texto oscuro */
+    border: 2px solid #1abc9c;
+    /* Borde verde */
+    border-radius: 8px;
+    /* Bordes redondeados */
+    padding: 20px;
+    margin-bottom: 15px;
+    /* Espaciado entre tarjetas */
+    width: 90%;
+    /* Ancho relativo */
+    max-width: 400px;
+    /* Ancho máximo */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    /* Sombra */
+    text-align: left;
+    /* Alinear texto dentro de las tarjetas */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* Animación al pasar el cursor */
+}
+
+/* Efecto hover para las tarjetas */
+#cropList li:hover {
+    transform: translateY(-5px);
+    /* Elevar la tarjeta */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    /* Sombra más profunda */
+}
+
+/* Título de cada cultivo */
+#cropList li strong {
+    font-size: 18px;
+    color: #1abc9c;
+    /* Destacar el nombre del cultivo */
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* Texto dentro de las tarjetas */
+#cropList li p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: white;
+    /* Texto gris oscuro */
+}
+
+.custom-file-input,
+.btn-classify {
+    display: inline-block;
+    background-color: #2c3e50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    margin: 10px 5px;
+    cursor: pointer;
+}
+
+.btn-classify {
+    background-color: #1abc9c;
+    display: none;
+    /* Initially hidden */
+}

@@ -191,11 +191,15 @@ button#infoButton img.button-image:hover {
     max-width: 100%;
     max-height: 300px;
     object-fit: cover;
-    border: 2px solid #1abc9c; /* Marco */
-    border-radius: 10px; /* Bordes redondeados */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra */
-    background-color: #2c3e50; /* Placeholder fondo */
-  }
+    border: 2px solid #1abc9c;
+    /* Marco */
+    border-radius: 10px;
+    /* Bordes redondeados */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    /* Sombra */
+    background-color: #2c3e50;
+    /* Placeholder fondo */
+}
 
 #imagePreview .preview-text {
     color: #555;
@@ -274,6 +278,38 @@ button#infoButton img.button-image:hover {
     font-size: 14px;
     color: white;
     /* Texto gris oscuro */
+}
+
+#result {
+    font-size: 1.2em;
+    color: #ecf0f1;
+    /* Texto claro */
+    margin-top: 15px;
+}
+
+/* Estilo para el encabezado de Recommended Crops */
+#recommendations h3 {
+    font-size: 22px;
+    color: #ffffff;
+    /* Blanco */
+    margin-bottom: 20px;
+}
+
+/* Estilo para el tipo de suelo predicho en el encabezado */
+#recommendations .predicted-soil {
+    color: #1abc9c;
+    /* Blanco */
+    font-weight: bold;
+    font-size: 1.2em;
+    text-transform: capitalize;
+    /* Capitalizar la primera letra */
+}
+
+.predicted-soil {
+    color: #1abc9c;
+    /* Verde */
+    font-weight: bold;
+    font-size: 1.3em;
 }
 
 .custom-file-input,

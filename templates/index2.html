@@ -131,7 +131,7 @@
         modal.style.display = 'block';
       }
 
-      // Cerrar el modal
+      // Close the modal
       function closeModal() {
         const modal = document.getElementById('infoModal');
         modal.style.display = 'none';
@@ -145,8 +145,8 @@
 
         document.getElementById('loader').style.display = 'block'; // Show loader
         document.getElementById('result').textContent = ''; // Clear previous result
-        document.getElementById('recommendations').style.display = 'none'; // Ocultar recomendaciones
-        document.getElementById('gifContainer').style.display = 'none'; // Ocultar el GIF
+        document.getElementById('recommendations').style.display = 'none'; // Hide recommendations
+        document.getElementById('gifContainer').style.display = 'none'; // Hide gif
         const formData = new FormData();
         formData.append('file', selectedFile);
 
@@ -159,17 +159,21 @@
           document.getElementById('loader').style.display = 'none'; // Hide loader
 
           if (response.ok) {
-            document.getElementById('result').textContent = `Prediction: ${data.prediction}`;
-
+            const soilPrediction = data.prediction;
+            document.getElementById('result').innerHTML = `
+              <p>Your soil is: <span class="predicted-soil">${soilPrediction}</span></p>
+            `;
             if (data.gif_path) {
               const gifElement = document.getElementById('preprocessingGif');
-              gifElement.src = data.gif_path; // Establece la ruta del GIF generado
-              document.getElementById('gifContainer').style.display = 'block'; // Mostrar la tarjeta del GIF
+              gifElement.src = data.gif_path;
+              document.getElementById('gifContainer').style.display = 'block';
             }
 
             // Handle crop recommendations
             const recommendationsDiv = document.getElementById('recommendations');
-            recommendationsDiv.style.display = 'block';
+            recommendationsDiv.querySelector('h3').innerHTML = `
+              Recommended Crops for <span class="predicted-soil">${data.prediction}</span>:
+            `;
             const cropList = document.getElementById('cropList');
             cropList.innerHTML = ''; // Clear previous recommendations
 

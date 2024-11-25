@@ -1,5 +1,5 @@
 import cv2
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session, redirect, url_for
 from PIL import Image
 import numpy as np
 import torch
@@ -7,70 +7,97 @@ import torchvision.transforms as transforms
 import sqlite3
 
 app = Flask(__name__)
+app.secret_key = '12345'
 
 # Inicializa la base de datos al cargar el servidor
 def initialize_database():
-    conn = sqlite3.connect('soil_crops.db')
-    cursor = conn.cursor()
+    try:
+        conn = sqlite3.connect('soil_crops.db')
+        cursor = conn.cursor()
 
-    # Crear tablas si no existen
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS soils (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT UNIQUE
-    )
-    ''')
+        # Crear tablas si no existen
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS soils (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE
+        )
+        ''')
 
-    # Crear tabla crops si no existe
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS crops (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        season TEXT,
-        difficulty TEXT
-    )
-    ''')
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS crops (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            season TEXT,
+            difficulty TEXT,
+            description TEXT
+        )
+        ''')
 
-    # Crear tabla soil_crops si no existe
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS soil_crops (
-        soil_id INTEGER,
-        crop_id INTEGER,
-        FOREIGN KEY(soil_id) REFERENCES soils(id),
-        FOREIGN KEY(crop_id) REFERENCES crops(id)
-    )
-    ''')
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS soil_crops (
+            soil_id INTEGER,
+            crop_id INTEGER,
+            compatibility TEXT,
+            FOREIGN KEY(soil_id) REFERENCES soils(id),
+            FOREIGN KEY(crop_id) REFERENCES crops(id)
+        )
+        ''')
 
-    # Insertar datos iniciales en la tabla `soils`
-    soils = ['Alluvial Soil', 'Black Soil', 'Clay Soil', 'Red Soil']
-    for soil in soils:
-        cursor.execute('INSERT OR IGNORE INTO soils (name) VALUES (?)', (soil,))
+        # Insertar datos iniciales en la tabla soils
+        soils = ['Alluvial Soil', 'Black Soil', 'Clay Soil', 'Red Soil']
+        for soil in soils:
+            cursor.execute('INSERT OR IGNORE INTO soils (name) VALUES (?)', (soil,))
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+        print("Database initialized successfully!")
+    except sqlite3.Error as e:
+        print(f"Error initializing the database: {e}")
+    finally:
+        if conn:
+            conn.close()
+
 
 initialize_database()  # Llamar al inicio del servidor
 
 def get_crops_for_soil(soil_name):
-    """Obtiene los cultivos recomendados para un tipo de suelo."""
     conn = sqlite3.connect('soil_crops.db')
     cursor = conn.cursor()
 
-    # Query para obtener cultivos relacionados con el suelo dado
     query = '''
-    SELECT crops.name, crops.season, crops.difficulty
+    SELECT crops.name, crops.season, crops.difficulty, crops.description, soil_crops.compatibility
     FROM crops
     JOIN soil_crops ON crops.id = soil_crops.crop_id
     JOIN soils ON soils.id = soil_crops.soil_id
     WHERE soils.name = ?
+    ORDER BY 
+        CASE 
+            WHEN soil_crops.compatibility = 'Alta' THEN 1
+            WHEN soil_crops.compatibility = 'Media' THEN 2
+            WHEN soil_crops.compatibility = 'Baja' THEN 3
+        END
     '''
-    cursor.execute(query, (soil_name,))
-    results = cursor.fetchall()
+    try:
+        cursor.execute(query, (soil_name,))
+        results = cursor.fetchall()
+    except Exception as e:
+        print(f"Error in query: {e}")
+        results = []
 
     conn.close()
 
-    # Formatear resultados en una lista de diccionarios
-    return [{'name': row[0], 'season': row[1], 'difficulty': row[2]} for row in results]
+    # Formatear los resultados
+    return [
+        {
+            'name': row[0],
+            'season': row[1],
+            'difficulty': row[2],
+            'description': row[3],
+            'compatibility': row[4]
+        }
+        for row in results
+    ]
+
+
 
 # Define class labels (actualízalos si es necesario)
 class_labels = ['Alluvial Soil', 'Black Soil', 'Clay Soil', 'Red Soil']
@@ -108,8 +135,24 @@ def preprocess_image(image, target_size=(299, 299)):
 
 # Rutas de Flask
 @app.route('/')
-def home():
-    return render_template('index.html')
+def location_permission():
+    return render_template('location2.html')
+
+@app.route('/set_location', methods=['POST'])
+def set_location():
+    # Store the user's location in the session after consent
+    location = request.json.get('location')
+    if location:
+        session['location'] = location
+        return jsonify({'message': 'Location saved successfully!'}), 200
+    return jsonify({'error': 'Location not provided'}), 400
+
+@app.route('/index')
+def index():
+    # Retrieve the stored location from session and pass it to the index page
+    location = session.get('location')
+    return render_template('index2.html', location=location)
+
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -140,6 +183,7 @@ def predict():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/test')
 def test():

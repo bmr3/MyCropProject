@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Location Permission</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #2c3e50; /* Darker background */
+      color: #ecf0f1; /* Light text */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+      padding: 20px;
+    }
+
+    /* Container box for content */
+    .container {
+      background-color: #34495e; /* Slightly lighter background for the box */
+      padding: 30px 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 500px;
+    }
+
+    h1 {
+      color: #1abc9c; /* Light green color */
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 1.2em;
+      margin: 20px 0;
+    }
+
+    /* Buttons styles */
+    .btn {
+      background-color: #1abc9c; /* Teal background */
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 15px 10px;
+      font-size: 1.1em;
+      transition: background-color 0.3s ease;
+      width: 100%; /* Make buttons full width */
+    }
+
+    .btn:hover {
+      background-color: #16a085; /* Darker teal on hover */
+    }
+
+    /* Location info styles */
+    .location-info {
+      margin-top: 20px;
+      font-size: 1.1em;
+      color: #ecf0f1; /* Light text color for information */
+    }
+
+    /* Hide the location info initially */
+    #locationInfo {
+      display: none;
+      margin-top: 20px;
+      font-size: 1.1em;
+      color: #ecf0f1;
+    }
+
+    /* Mobile responsive layout */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2em; /* Reduce title size for smaller screens */
+      }
+
+      .btn {
+        padding: 10px 20px; /* Adjust button size */
+        font-size: 1em; /* Make buttons slightly smaller */
+        width: 100%; /* Buttons full width on mobile */
+      }
+
+      .container {
+        padding: 15px; /* Reduce padding for smaller devices */
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome to MyCrop</h1>
+    <p>Would you like to share your location with us to receive better crop recommendations?</p>
+  
+    <button class="btn" onclick="getLocationPermission(true)">Yes, Share Location</button>
+    <button class="btn" onclick="getLocationPermission(false)">No, Skip</button>
+  
+    <div id="locationInfo" class="location-info" style="display: none;">
+      <p><strong>Location:</strong></p>
+      <p id="locationDetails"></p>
+    </div>
+  </div>
+
+  <script>
+    function getLocationPermission(shareLocation) {
+      if (shareLocation) {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            const location = position.coords;
+            document.getElementById('locationDetails').innerText = `Latitude: ${location.latitude}, Longitude: ${location.longitude}`;
+            document.getElementById('locationInfo').style.display = 'block';
+
+            // Send the location to the server via a POST request
+            fetch('/set_location', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ location: { latitude: location.latitude, longitude: location.longitude } }),
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.message) {
+                // Redirect to the index page after saving the location
+                window.location.href = '/index';
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+            });
+          }, function() {
+            alert("Unable to retrieve location.");
+            window.location.href = '/index';  // Redirect even if location is not available
+          });
+        } else {
+          alert("Geolocation is not supported by this browser.");
+          window.location.href = '/index';  // Redirect to the index page
+        }
+      } else {
+        window.location.href = '/index';  // Skip location and redirect
+      }
+    }
+  </script>
+</body>
+</html>

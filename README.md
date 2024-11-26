@@ -61,7 +61,7 @@ A pre-trained ResNet18 model is included in the repository for immediate use.
 ### **5. Running the App**
 Start the Flask backend:
 ```bash
-python app.py
+python backend.py
 ```
 
 This will launch a local server (by default at `http://127.0.0.1:5000`).

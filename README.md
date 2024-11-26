@@ -53,7 +53,7 @@ pip install -r requirements.txt
 ### **3. Model Training (Optional)**
 If you'd like to train the model from scratch:
 1. Prepare a dataset of soil images classified into Alluvial, Black, Clay, and Red soil.
-2. Use the provided `train_model` function in the `model_training.ipynb` notebook.
+2. Use the provided `train_model` function in the `model_pytorch.ipynb` notebook.
 
 ### **4. Pre-Trained Model**
 A pre-trained ResNet18 model is included in the repository for immediate use.
